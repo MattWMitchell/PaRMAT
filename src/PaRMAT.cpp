@@ -54,8 +54,8 @@ int main( int argc, char ** argv ) {
 		-Allow edge to self (default:yes). To disable: -noEdgeToSelf\n\
 		-Allow duplicate edges (default:yes). To disable: -noDuplicateEdges\n\
 		-Will the graph be directed (default:yes). To make it undirected: -undirected\n\
-		-Usage of available system memory (default: 0.5 which means up to half of available RAM may be requested). E.g., -memUsage 0.9";
-
+		-Usage of available system memory (default: 0.5 which means up to half of available RAM may be requested). E.g., -memUsage 0.9\n\
+		-Seed to ensure consistent results. E.g., -seed 10";
 
 	std::ofstream outf;
 	unsigned long long nEdges = 0, nVertices = 0;
@@ -67,6 +67,8 @@ int main( int argc, char ** argv ) {
 	bool allowDuplicateEdges = true;
 	bool directedGraph = true;
 	unsigned long long standardCapacity = 0;
+	std::random_device rd;
+	unsigned long seed = rd();
 
 	try{
 
@@ -86,6 +88,8 @@ int main( int argc, char ** argv ) {
 				c = std::stod( std::string(argv[iii+1]) );
 			else if( !strcmp(argv[iii], "-threads") && iii != argc-1 /*is not the last one*/)
 				nCPUWorkerThreads = determine_num_of_CPU_worker_thread( std::stoul( std::string(argv[iii+1]) ) );
+			else if( !strcmp(argv[iii], "-seed") && iii != argc-1 /*is not the last one*/)
+				seed = std::stoull( std::string(argv[iii+1]) );
 			else if( !strcmp(argv[iii], "-sorted"))
 				sorted = true;
 			else if( !strcmp(argv[iii], "-memUsage") && iii != argc-1 /*is not the last one*/)
@@ -142,8 +146,8 @@ int main( int argc, char ** argv ) {
 
 		// Start the work.
 		--nVertices;
-		auto fOutcome = sorted ?	GraphGen_sorted::GenerateGraph( nEdges, nVertices, a, b, c, nCPUWorkerThreads, outf, standardCapacity, allowEdgeToSelf, allowDuplicateEdges, directedGraph ) :
-									GraphGen_notSorted::GenerateGraph( nEdges, nVertices, a, b, c, nCPUWorkerThreads, outf, standardCapacity, allowEdgeToSelf, allowDuplicateEdges, directedGraph );
+		auto fOutcome = sorted ?	GraphGen_sorted::GenerateGraph( nEdges, nVertices, a, b, c, nCPUWorkerThreads, outf, standardCapacity, allowEdgeToSelf, allowDuplicateEdges, directedGraph, seed ) :
+									GraphGen_notSorted::GenerateGraph( nEdges, nVertices, a, b, c, nCPUWorkerThreads, outf, standardCapacity, allowEdgeToSelf, allowDuplicateEdges, directedGraph, seed );
 		if( fOutcome == EXIT_FAILURE ) {
 			std::cerr << "Exiting." << std::endl;
 			return( EXIT_FAILURE );
