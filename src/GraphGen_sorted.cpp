@@ -18,14 +18,15 @@ void EachThreadGeneratesEdges(
 		std::vector<Square>& recs,
 		std::vector<Edge>& edgesVec,
 		const double RMAT_a, const double RMAT_b, const double RMAT_c,
-		const bool allowEdgeToSelf, const bool allowDuplicateEdges, const bool directedGraph
+		const bool allowEdgeToSelf, const bool allowDuplicateEdges, const bool directedGraph,
+		const long seed
 		) {
 
 	// First clean the edge vector before adding any.
 	edgesVec.clear();
 
 	std::random_device rd;
-	std::mt19937_64 gen(rd());
+	std::mt19937_64 gen(seed);
 	std::uniform_int_distribution<> dis;
 
 	// Reserve enough memory once.
@@ -82,7 +83,8 @@ bool GraphGen_sorted::GenerateGraph(
 		const unsigned long long standardCapacity,
 		const bool allowEdgeToSelf,
 		const bool allowDuplicateEdges,
-		const bool directedGraph
+		const bool directedGraph,
+		const long seed
 		) {
 
 	std::vector<Square> squares ( 1, Square( 0, nVertices, 0, nVertices, nEdges, 0, 0, 0 ) );
@@ -141,7 +143,7 @@ bool GraphGen_sorted::GenerateGraph(
 		// First each PU gets assigned to a job.
 		unsigned int recIdx = 0;
 		for( ; recIdx < nCPUWorkerThreads && recIdx < rectagnleVecs.size(); ++recIdx )
-			tasks_to_complete.push_back( std::async( std::launch::async, EachThreadGeneratesEdges, std::ref(rectagnleVecs.at(recIdx)), std::ref(threads_edges[recIdx]), RMAT_a, RMAT_b, RMAT_c, allowEdgeToSelf, allowDuplicateEdges, directedGraph ) );
+			tasks_to_complete.push_back( std::async( std::launch::async, EachThreadGeneratesEdges, std::ref(rectagnleVecs.at(recIdx)), std::ref(threads_edges[recIdx]), RMAT_a, RMAT_b, RMAT_c, allowEdgeToSelf, allowDuplicateEdges, directedGraph, seed ) );
 
 		// If any jobs left, main thread has to wait for the first worker thread and write the outcome before initiating any other worker thread.
 		for( ; recIdx < rectagnleVecs.size(); ++recIdx ) {
@@ -151,7 +153,7 @@ bool GraphGen_sorted::GenerateGraph(
 			tasks_to_complete.erase(tasks_to_complete.begin());
 			tasks_to_complete.push_back( std::async( std::launch::async, EachThreadGeneratesEdges,
 					std::ref(rectagnleVecs.at(recIdx)), std::ref(threads_edges[recIdx%nCPUWorkerThreads]),
-					RMAT_a, RMAT_b, RMAT_c, allowEdgeToSelf, allowDuplicateEdges, directedGraph ) );
+					RMAT_a, RMAT_b, RMAT_c, allowEdgeToSelf, allowDuplicateEdges, directedGraph, seed ) );
 		}
 
 		// Joining last threads.
@@ -178,7 +180,7 @@ bool GraphGen_sorted::GenerateGraph(
 			threads.push_back( std::thread( EachThreadGeneratesEdges,
 					std::ref(rectagnleVecs.at(recIdx)),
 					std::ref(threads_edges[recIdx]),
-					RMAT_a, RMAT_b, RMAT_c, allowEdgeToSelf, allowDuplicateEdges, directedGraph ) );
+					RMAT_a, RMAT_b, RMAT_c, allowEdgeToSelf, allowDuplicateEdges, directedGraph, seed ) );
 
 		// If any jobs left, main thread has to wait for the first worker thread and write the outcome before initiating any other worker thread.
 		for( ; recIdx < rectagnleVecs.size(); ++recIdx ) {
@@ -187,7 +189,7 @@ bool GraphGen_sorted::GenerateGraph(
 			progressBar();
 			threads.erase(threads.begin());
 			threads.push_back( std::thread( EachThreadGeneratesEdges,
-					std::ref(rectagnleVecs.at(recIdx)), std::ref(threads_edges[recIdx%nCPUWorkerThreads]), RMAT_a, RMAT_b, RMAT_c, allowEdgeToSelf, allowDuplicateEdges, directedGraph ) );
+					std::ref(rectagnleVecs.at(recIdx)), std::ref(threads_edges[recIdx%nCPUWorkerThreads]), RMAT_a, RMAT_b, RMAT_c, allowEdgeToSelf, allowDuplicateEdges, directedGraph, seed ) );
 		}
 
 		// Joining last threads.
