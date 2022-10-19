@@ -47,6 +47,7 @@ creates a graph with a million edges and a hundred thousand vertices. Other acce
 		-Allow duplicate edges (default:yes). To disable: -noDuplicateEdges
 		-Will the graph be directed (default:yes). To make it undirected: -undirected
 		-Usage of available system memory (default: 0.5 which means up to half of available RAM may be requested). E.g., -memUsage 0.9
+		-Seed of the random generator (default: random, so set to a number to fix the output). E.g., -seed 10
 
 In addition to above arguments, there are a number of parameters internal to the program itself. They are accessible in `internal_config.hpp`. After applying modifications to this file, you obviously need to re-compile the program to see the effects.
 
