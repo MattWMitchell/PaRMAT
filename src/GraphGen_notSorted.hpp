@@ -15,7 +15,8 @@ namespace GraphGen_notSorted{
 			const unsigned long long standardCapacity,
 			const bool allowEdgeToSelf,
 			const bool allowDuplicateEdges,
-			const bool directedGraph
+			const bool directedGraph,
+			const long seed
 			);
 
 };
