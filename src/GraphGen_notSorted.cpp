@@ -61,7 +61,8 @@ bool GraphGen_notSorted::GenerateGraph(
 		const unsigned long long standardCapacity,
 		const bool allowEdgeToSelf,
 		const bool allowDuplicateEdges,
-		const bool directedGraph
+		const bool directedGraph,
+		const long seed
 		) {
 
 	std::vector<Square> squares ( 1, Square( 0, nVertices, 0, nVertices, nEdges, 0, 0, 0 ) );
@@ -117,7 +118,7 @@ bool GraphGen_notSorted::GenerateGraph(
 			std::vector<Edge> edgeVector;
 
 			std::random_device rd;
-			std::mt19937_64 gen(rd());
+			std::mt19937_64 gen(seed);
 			std::uniform_int_distribution<> dis;
 
 			for( unsigned int recIdx = puId; recIdx < squares.size(); recIdx += nWorkerThreads ) {
@@ -152,7 +153,7 @@ bool GraphGen_notSorted::GenerateGraph(
 
 		auto eachThreadGenEdgesUsingQueuesFunc = [&] {
 			std::random_device rd;
-			std::mt19937_64 gen(rd());
+			std::mt19937_64 gen(seed);
 			std::uniform_int_distribution<> dis;
 			Square rec;
 			while( rec_queue.try_pop(std::ref(rec)) != 0 ) {
